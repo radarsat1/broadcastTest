@@ -4,8 +4,10 @@
 #include <string.h>
 
 #include <sys/socket.h>
+#include <sys/errno.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 
 int sock=-1;
 char data[]="Test message.";
@@ -54,9 +56,6 @@ void do_recv()
         goto done;
     }
 
-    int opt = 1;
-    setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(int));
-
     struct addrinfo *ai=0;
     struct addrinfo hints;
     int ret;
@@ -71,10 +70,17 @@ void do_recv()
         goto done;
     }
 
+    printf("ai->ai_addr: %s\n", inet_ntoa(((struct sockaddr_in*)ai->ai_addr)->sin_addr));
+    printf("ai->ai_addrlen: %d\n", ai->ai_addrlen);
+
     if (bind(sock, ai->ai_addr, ai->ai_addrlen) < 0) {
         perror("bind");
+        printf("%d: %s\n", errno, strerror(errno));
         goto done;
     }
+
+    int opt = 1;
+    setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(int));
 
     char d[256];
     if (recvfrom(sock, d, datalen, 0, ai->ai_addr, &ai->ai_addrlen) < 0) {
