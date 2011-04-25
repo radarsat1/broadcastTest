@@ -5,6 +5,7 @@
 
 #include <sys/socket.h>
 #include <sys/errno.h>
+#include <sys/signal.h>
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -12,6 +13,12 @@
 int sock=-1;
 char data[]="Test message.";
 int datalen=sizeof(data);
+
+int quit=0;
+void ctrlc(int unused)
+{
+    quit = 1;
+}
 
 void do_send()
 {
@@ -50,6 +57,8 @@ void do_send()
 
 void do_recv()
 {
+    signal(SIGINT, ctrlc);
+
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock==-1) {
         perror("socket");
@@ -82,13 +91,15 @@ void do_recv()
     int opt = 1;
     setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(int));
 
-    char d[256];
-    if (recvfrom(sock, d, datalen, 0, ai->ai_addr, &ai->ai_addrlen) < 0) {
-        perror("recvfrom");
-        goto done;
-    }
+    while (!quit) {
+        char d[256];
+        if (recvfrom(sock, d, datalen, 0, ai->ai_addr, &ai->ai_addrlen) < 0) {
+            perror("recvfrom");
+            goto done;
+        }
 
-    printf("Message received: `%s'\n", d);
+        printf("Message received: `%s'\n", d);
+    }
 
   done:
     if (sock!=-1)
