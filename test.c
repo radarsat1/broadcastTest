@@ -35,7 +35,7 @@ void do_send()
         goto done;
     }
 
-    ret = sendto(sock, data, datalen, MSG_NOSIGNAL,
+    ret = sendto(sock, data, datalen, 0,
                  ai->ai_addr, ai->ai_addrlen);
     printf("Sent message.\n");
 
