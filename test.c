@@ -32,7 +32,7 @@ void do_send()
     hints.ai_family = PF_INET;
     hints.ai_socktype = SOCK_DGRAM;
 
-    if ((ret = getaddrinfo("255.255.255.255", "7570", &hints, &ai))) {
+    if ((ret = getaddrinfo("10.0.1.255", "7570", &hints, &ai))) {
         perror("getaddrinfo");
         goto done;
     }
@@ -65,7 +65,7 @@ void do_recv()
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_flags = AI_PASSIVE;
 
-    if ((ret = getaddrinfo("255.255.255.255", "7570", &hints, &ai))) {
+    if ((ret = getaddrinfo("10.0.1.255", "7570", &hints, &ai))) {
         perror("getaddrinfo");
         goto done;
     }
